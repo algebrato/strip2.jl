@@ -1,4 +1,5 @@
-include("../src/Strip2.jl")
+#include("../src/Strip2.jl")
+using strip2
 using DelimitedFiles
 using Plots
 gr()
