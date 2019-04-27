@@ -8,7 +8,7 @@ gr()
 NN = 1024
 NSIDE = 64
 pix_size = 0.5
-beam_waist = 3.5
+beam_waist = 1.12
 
 # SZ Effect
 N_SZ_Clusters  = 500
@@ -46,8 +46,25 @@ point_expo = strip2.PS_exp(NN, pix_size, N_Sources_EXP, A_Sources_EXP)
 mapp = cmb_T_map .+ sz_map .+ point_pois .+ point_expo
 conv_map = strip2.convolve_beam(NN, pix_size, beam_waist, mapp)
 
+# gradient = ColorGradient([:blue, :white, :red])
+# heatmap( conv_map, c=gradient, xlabel = "x [px]",
+#                          ylabel = "y [px]",
+#                          clims=(-400, 400)
+#         )
+
+# Noise Map
+wnl = 10.0
+anl = 0.1
+oofnl = 0.2
+
+white_map = strip2.white_noise(NN, pix_size, wnl)
+atmos_map = strip2.atmospheric_noise(NN, pix_size, anl)
+one_ove_f = strip2.one_over_f(NN, pix_size, oofnl)
+
+noise_map = white_map .+ atmos_map .+ one_ove_f
+
 gradient = ColorGradient([:blue, :white, :red])
-heatmap( conv_map, c=gradient, xlabel = "x [px]",
+heatmap( noise_map, c=gradient, xlabel = "x [px]",
                          ylabel = "y [px]",
-                         clims=(-400, 400)
+                         clims=(-100, 100)
         )
