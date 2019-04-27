@@ -1,5 +1,5 @@
-#include("../src/strip2.jl")
-using strip2
+include("../src/strip2.jl")
+#using strip2
 using DelimitedFiles
 using Plots
 gr()
@@ -8,7 +8,7 @@ gr()
 NN = 1024
 NSIDE = 64
 pix_size = 0.5
-
+beam_waist = 3.5
 
 # SZ Effect
 N_SZ_Clusters  = 500
@@ -44,9 +44,10 @@ point_expo = strip2.PS_exp(NN, pix_size, N_Sources_EXP, A_Sources_EXP)
 
 
 mapp = cmb_T_map .+ sz_map .+ point_pois .+ point_expo
+conv_map = strip2.convolve_beam(NN, pix_size, beam_waist, mapp)
 
 gradient = ColorGradient([:blue, :white, :red])
-heatmap( mapp, c=gradient, xlabel = "x [px]",
+heatmap( conv_map, c=gradient, xlabel = "x [px]",
                          ylabel = "y [px]",
                          clims=(-400, 400)
         )
