@@ -17,10 +17,13 @@ export convolve_beam
 export white_noise
 export atmospheric_noise
 export one_over_f
-
+export filter_noise
 
 include("gensky.jl")
 include("beam.jl")
 include("noise_map.jl")
+include("filter.jl")
+include("genpoints.jl")
+include("mapmaker.jl")
 
 end  # module strip2

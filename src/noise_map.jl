@@ -1,4 +1,4 @@
-function white_noise(N, pix_size, wnl)
+function white_noise(N::Int, pix_size::Float64, wnl::Float64)
 
     rng = MersenneTwister()
     white_noise_map = randn(rng, N, N) .* (wnl / pix_size)
@@ -8,7 +8,7 @@ function white_noise(N, pix_size, wnl)
 end
 
 
-function atmospheric_noise(N, pix_size, anl)
+function atmospheric_noise(N::Int, pix_size::Float64, anl::Float64)
 
     rng = MersenneTwister()
     random_realization = randn(rng, N, N)
@@ -28,7 +28,7 @@ function atmospheric_noise(N, pix_size, anl)
 end
 
 
-function one_over_f(N, pix_size, oofnl)
+function one_over_f(N::Int, pix_size::Float64, oofnl::Float64)
 
     rng = MersenneTwister()
     random_realization = randn(rng, N, N)
