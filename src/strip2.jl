@@ -18,6 +18,7 @@ export white_noise
 export atmospheric_noise
 export one_over_f
 export filter_noise
+export observe_sky
 
 include("gensky.jl")
 include("beam.jl")

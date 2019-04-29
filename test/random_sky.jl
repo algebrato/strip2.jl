@@ -7,7 +7,7 @@ gr()
 # General constants
 NN = 1024
 pix_size = 0.5
-beam_waist = 1.12
+beam_waist = 10.0
 
 # SZ Effect
 N_SZ_Clusters  = 500
@@ -45,8 +45,13 @@ point_expo = strip2.PS_exp(NN, pix_size, N_Sources_EXP, A_Sources_EXP)
 mapp = cmb_T_map .+ sz_map .+ point_pois .+ point_expo
 conv_map = strip2.convolve_beam(NN, pix_size, beam_waist, mapp)
 
-gradient = ColorGradient([:blue, :white, :red])
-heatmap( conv_map, c=gradient, xlabel = "x [px]",
-                         ylabel = "y [px]",
-                         clims=(-400, 400)
-        )
+# gradient = ColorGradient([:blue, :white, :red])
+# heatmap( conv_map, c=gradient, xlabel = "x [px]",
+#                          ylabel = "y [px]",
+#                          clims=(-400, 400),
+#                          size=(580,480)
+#         )
+
+tod_d1, tod_d2 = strip2.observe_sky(NN, conv_map)
+plot(tod_d1, ylims=(-400, 400))
+plot!(tod_d2)
