@@ -53,7 +53,7 @@ oofnl = 0.2
 white_map = strip2.white_noise(NN, pix_size, wnl)
 atmos_map = strip2.atmospheric_noise(NN, pix_size, anl)
 one_ove_f = strip2.one_over_f(NN, pix_size, oofnl)
-noise_map = white_map .+ atmos_map .+ one_ove_f
+noise_map = white_map .+ atmos_map #.+ one_ove_f
 
 # Combine the two maps
 map_tot_cosm_noise = conv_map .+ noise_map
