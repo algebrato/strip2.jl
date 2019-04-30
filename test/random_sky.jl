@@ -3,11 +3,11 @@ include("../src/strip2.jl")
 using DelimitedFiles
 using Plots
 gr()
-
+# Strip2: 54deg x 54deg
 # General constants
 NN = 1024
 pix_size = 0.5
-beam_waist = 10.0
+beam_waist = 1.2
 
 # SZ Effect
 N_SZ_Clusters  = 500
@@ -42,16 +42,39 @@ point_pois = strip2.PS_poisson(NN, pix_size, N_Sources_POIS, A_Sources_POIS)
 point_expo = strip2.PS_exp(NN, pix_size, N_Sources_EXP, A_Sources_EXP)
 
 
-mapp = cmb_T_map .+ sz_map .+ point_pois .+ point_expo
+mapp = cmb_T_map #.+ sz_map .+ point_pois .+ point_expo
 conv_map = strip2.convolve_beam(NN, pix_size, beam_waist, mapp)
 
-# gradient = ColorGradient([:blue, :white, :red])
-# heatmap( conv_map, c=gradient, xlabel = "x [px]",
-#                          ylabel = "y [px]",
-#                          clims=(-400, 400),
-#                          size=(580,480)
-#         )
+# Noise Map
+wnl = 10.0
+anl = 0.15
+oofnl = 0.2
 
-tod_d1, tod_d2 = strip2.observe_sky(NN, conv_map)
-plot(tod_d1, ylims=(-400, 400))
-plot!(tod_d2)
+white_map = strip2.white_noise(NN, pix_size, wnl)
+atmos_map = strip2.atmospheric_noise(NN, pix_size, anl)
+one_ove_f = strip2.one_over_f(NN, pix_size, oofnl)
+noise_map = white_map .+ atmos_map .+ one_ove_f
+
+# Combine the two maps
+map_tot_cosm_noise = conv_map .+ noise_map
+
+# Very dummy filtering
+#N_mask = 2.0
+#filtered_map = strip2.filter_noise(NN, N_mask, map_tot_cosm_noise)
+
+
+Map_win = strip2.windowing!(NN, map_tot_cosm_noise)
+ell2, DlTT2 = strip2.get_power_spectrum(Map_win, Map_win, 5000.0, 50.0, pix_size, NN)
+
+#tod_d1, tod_d2 = strip2.observe_sky(NN, conv_map, true)
+#plot(tod_d1)#, ylims=(-400, 400))
+#plot!(tod_d2)
+plot(ell, DlTT, yaxis = :log)
+plot!(ell2, DlTT2)
+#
+gradient = ColorGradient([:blue, :white, :red])
+heatmap( Map_win, c=gradient, xlabel = "x [px]",
+                         ylabel = "y [px]",
+                         clims=(-400, 400),
+                         size=(580,480)
+        )

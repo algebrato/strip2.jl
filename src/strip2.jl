@@ -19,6 +19,11 @@ export atmospheric_noise
 export one_over_f
 export filter_noise
 export observe_sky
+export tod_noise
+
+# Analysis tools
+export windowing!
+export get_power_spectrum
 
 include("gensky.jl")
 include("beam.jl")
@@ -26,5 +31,6 @@ include("noise_map.jl")
 include("filter.jl")
 include("genpoints.jl")
 include("mapmaker.jl")
+include("analysis.jl")
 
 end  # module strip2
