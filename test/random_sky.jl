@@ -5,7 +5,7 @@ using Plots
 gr()
 # Strip2: 54deg x 54deg
 # General constants
-NN = 1024
+NN = 3024
 pix_size = 0.5
 beam_waist = 3.0
 
@@ -42,59 +42,59 @@ point_pois = strip2.PS_poisson(NN, pix_size, N_Sources_POIS, A_Sources_POIS)
 point_expo = strip2.PS_exp(NN, pix_size, N_Sources_EXP, A_Sources_EXP)
 
 
-mapp = cmb_T_map #.+ sz_map .+ point_pois .+ point_expo
+mapp = cmb_T_map .+ sz_map .+ point_pois .+ point_expo
 conv_map = strip2.convolve_beam(NN, pix_size, beam_waist, mapp)
 
-# Noise Map
-wnl = 10.0
-anl = 0.15
-oofnl = 0.2
-
-white_map = strip2.white_noise(NN, pix_size, wnl)
-atmos_map = strip2.atmospheric_noise(NN, pix_size, anl)
-one_ove_f = strip2.one_over_f(NN, pix_size, oofnl)
-noise_map = white_map .+ atmos_map .+ one_ove_f
-
-# Combine the two maps
-map_tot_cosm_noise = conv_map #.+ noise_map
-
-# Very dummy filtering
-N_mask = 4.0
-filtered_map = strip2.filter_noise(NN, N_mask, map_tot_cosm_noise)
-
-ell_max = 5000.0
-delta_ell = 50.0
-
-bin_spec_cur = zeros(Int(round(ell_max/delta_ell)))
-Map_win = strip2.windowing!(NN, map_tot_cosm_noise)
-
-# Non Funziona Cazzo!
-
-for i = 1:1
-    cmb_T_map = strip2.make_CMB_T_map(NN, pix_size, ell, DlTT)
-    conv_map = strip2.convolve_beam(NN, pix_size, beam_waist, cmb_T_map)
-    Map_win = strip2.windowing!(NN, conv_map)
-    ell2, DlTT2 = strip2.get_power_spectrum(Map_win, Map_win, ell_max, delta_ell, pix_size, NN)
-    bin_spec_cur .+= DlTT2
-    println("Itration ", i," completed")
-end
-
-bin_spec_cur2 = bin_spec_cur ./ 1.00
-Mult_factor = DlTT[Int.(round.(ell2)) .- 1] ./ bin_spec_cur2
-
-#tod_d1, tod_d2 = strip2.observe_sky(NN, conv_map, true)
-#plot(tod_d1)#, ylims=(-400, 400))
-#plot!(tod_d2)
-plot(ell, DlTT, yaxis = :log)
-plot!(ell2, Mult_factor)
-
-cmb_T_map = strip2.make_CMB_T_map(NN, pix_size, ell, DlTT)
-conv_map = strip2.convolve_beam(NN, pix_size, beam_waist, cmb_T_map)
-Map_win = strip2.windowing!(NN, conv_map)
-ell2, DlTT2 = strip2.get_power_spectrum(Map_win, Map_win, ell_max, delta_ell, pix_size, NN)
-
-
-plot!(ell2,  (DlTT2 .* Mult_factor .*316.0))
+# # Noise Map
+# wnl = 10.0
+# anl = 0.15
+# oofnl = 0.2
+#
+# white_map = strip2.white_noise(NN, pix_size, wnl)
+# atmos_map = strip2.atmospheric_noise(NN, pix_size, anl)
+# one_ove_f = strip2.one_over_f(NN, pix_size, oofnl)
+# noise_map = white_map .+ atmos_map .+ one_ove_f
+#
+# # Combine the two maps
+# map_tot_cosm_noise = conv_map #.+ noise_map
+#
+# # Very dummy filtering
+# N_mask = 4.0
+# filtered_map = strip2.filter_noise(NN, N_mask, map_tot_cosm_noise)
+#
+# ell_max = 5000.0
+# delta_ell = 50.0
+#
+# bin_spec_cur = zeros(Int(round(ell_max/delta_ell)))
+# Map_win = strip2.windowing!(NN, map_tot_cosm_noise)
+#
+# # Non Funziona Cazzo!
+#
+# for i = 1:1
+#     cmb_T_map = strip2.make_CMB_T_map(NN, pix_size, ell, DlTT)
+#     conv_map = strip2.convolve_beam(NN, pix_size, beam_waist, cmb_T_map)
+#     Map_win = strip2.windowing!(NN, conv_map)
+#     ell2, DlTT2 = strip2.get_power_spectrum(Map_win, Map_win, ell_max, delta_ell, pix_size, NN)
+#     bin_spec_cur .+= DlTT2
+#     println("Itration ", i," completed")
+# end
+#
+# bin_spec_cur2 = bin_spec_cur ./ 1.00
+# Mult_factor = DlTT[Int.(round.(ell2)) .- 1] ./ bin_spec_cur2
+#
+# #tod_d1, tod_d2 = strip2.observe_sky(NN, conv_map, true)
+# #plot(tod_d1)#, ylims=(-400, 400))
+# #plot!(tod_d2)
+# plot(ell, DlTT, yaxis = :log)
+# plot!(ell2, Mult_factor)
+#
+# cmb_T_map = strip2.make_CMB_T_map(NN, pix_size, ell, DlTT)
+# conv_map = strip2.convolve_beam(NN, pix_size, beam_waist, cmb_T_map)
+# Map_win = strip2.windowing!(NN, conv_map)
+# ell2, DlTT2 = strip2.get_power_spectrum(Map_win, Map_win, ell_max, delta_ell, pix_size, NN)
+#
+#
+# plot!(ell2,  (DlTT2 .* Mult_factor .*316.0))
 
 
 
