@@ -19,7 +19,7 @@ include("gen_noise_map.jl")
 ell_max = 5000.0
 delta_ell = 30.0
 
-Map_win = strip2.windowing!(NN, cmb_T_map)
+Map_win = strip2.windowing!(NN, conv_map)
 ell2, DlTT2 = strip2.get_power_spectrum(Map_win, Map_win, ell_max, delta_ell,
                                         pix_size, NN)
 plot(ell, DlTT, yaxis = :log)

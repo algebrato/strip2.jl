@@ -7,7 +7,7 @@ gr()
 # General constants
 NN = 3024
 pix_size = 0.5
-beam_waist = 3.0
+beam_waist = 9.0
 
 # SZ Effect
 N_SZ_Clusters  = 500
