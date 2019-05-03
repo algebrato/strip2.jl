@@ -11,6 +11,8 @@ function make_CMB_T_map(N::Int, pix_size::Float64,
                         DlTT::AbstractArray{<:Number})
 
     ClTT = DlTT .* 2 .* π ./ (ell .* (ell .+ 1.) )
+    ClTT[1] = 0
+
     inds = ((0:(N-1)) .+ .5 .- ((N-1) / 2.0)) ./ (N-2.0)
 
     X  = reshape(repeat(range(-0.5, 0.5, length=N), N), N, N)
@@ -36,6 +38,92 @@ function make_CMB_T_map(N::Int, pix_size::Float64,
     T_cmb_map = T_cmb_map ./ (pix_size / 60.0 * π / 180.0)
 
     return real.(T_cmb_map)
+end
+
+
+function make_CMB_pol_maps(N::Int, pix_size::Float64,
+                           ell::Float64,
+                           DlTT::Float64,
+                           DlEE::Float64,
+                           DlTE::Float64,
+                           DlBB::Float64)
+
+    ClTT = DlTT .* 2 .* π ./ (ell .* (ell .+ 1.) )
+    ClEE = DlEE .* 2 .* π ./ (ell .* (ell .+ 1.) )
+    ClTE = DlTE .* 2 .* π ./ (ell .* (ell .+ 1.) )
+    ClBB = DlBB .* 2 .* π ./ (ell .* (ell .+ 1.) )
+
+    ClTT[1:2] .= 0
+    ClEE[1:2] .= 0
+    ClTE[1:2] .= 0
+    ClBB[1:2] .= 0
+
+    # correlation level between T and E-modes
+    corr_level_E = ClTE ./ sqrt.(ClTT)
+    uncorr_level_EE = ClEE .- ( (ClTE .^2.0) ./ ClTT )
+
+    corr_level_E[1:2] .= 0
+    uncorr_level_EE[1:2] .= 0
+
+    X  = reshape(repeat(range(-0.5, 0.5, length=N), N), N, N)
+    Y = X'
+    R = (X .^2 .+ Y .^2) .^0.5
+    ang = atan.(Y, X)
+
+    pix_to_rad = pix_size / 60. * π  / 180.  # Scale factor between pix to rad
+    ell_scale_factor = 2. * π / pix_to_rad
+
+    ell2d = R .* ell_scale_factor
+    max_l_R = Int64(floor(maximum(ell2d))+1)
+
+    ClTT_ex = vcat(ClTT, zeros(max_l_R - size(ClTT)[1]))
+
+    ClEE_uncor_ex = vcat(uncorr_level_EE,
+                         zeros(max_l_R - size(uncorr_level_EE)[1]))
+
+    ClEE_corr_ex = vcat(corr_level_EE,
+                         zeros(max_l_R - size(corr_level_EE)[1]))
+
+    ClBB_ex = vcat(ClBB, zeros(max_l_R - size(ClBB)[1]))
+
+    indici = trunc.(Int64, ell2d)
+    CLTT2d = ClTT_ex[indici]
+    ClEE_uncor2d = ClEE_uncor_ex[indici]
+    ClEE_cor2d = ClEE_cor_ex[indici]
+    CLBB2d = ClBB_ex[indici]
+
+
+    rng = MersenneTwister()
+    T_rand_arr = randn(rng, N, N)
+    E_rand_arr = randn(rng, N, N)
+    B_rand_arr = randn(rng, N, N)
+
+    fft_T_rand = fft(T_rand_arr)
+    fft_E_rand = fft(E_rand_arr)
+    fft_B_rand = fft(B_rand_arr)
+
+    FT_sky = (CLTT2d .^0.5) .* fft_T_rand
+    FE_sky = (ClEE_uncor2d .^0.5) .* fft_E_rand .+
+             (ClEE_uncor2d .^0.5) .* fft_T_rand
+    FB_sky = (CLBB2d .^0.5) .* fft_B_rand
+
+    # Conver the E and B maps into Q and U maps
+
+    FQ_sky = (FE_sky .* cos.(2.0 .* ang)) .- (FB_sky .* sin.(2.0 .* ang))
+    FU_sky = (FE_sky .* sin.(2.0 .* ang)) .+ (FB_sky .* cos.(2.0 .* ang))
+
+
+    T_cmb_map = ifft(ifftshift(FT_sky))
+    Q_cmb_map = ifft(ifftshift(FQ_sky))
+    U_cmb_map = iff(ifftshift(FU_sky))
+
+
+    T_cmb_map = T_cmb_map ./ (pix_size / 60.0 * π / 180.0)
+    Q_cmb_map = Q_cmb_map ./ (pix_size / 60.0 * π / 180.0)
+    U_cmb_map = U_cmb_map ./ (pix_size / 60.0 * π / 180.0)
+
+    return real.(T_cmb_map), real.(Q_cmb_map), real.(U_cmb_map)
+
 end
 
 

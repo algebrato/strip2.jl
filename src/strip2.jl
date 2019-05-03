@@ -6,6 +6,7 @@ using FFTW
 
 # gensky methods
 export make_CMB_T_map
+export make_CMB_pol_maps
 export SZ_source
 export PS_exp
 export PS_poisson

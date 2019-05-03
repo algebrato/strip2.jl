@@ -99,9 +99,9 @@ conv_map = strip2.convolve_beam(NN, pix_size, beam_waist, mapp)
 
 
 
-# gradient = ColorGradient([:blue, :white, :red])
-# heatmap( Map_win, c=gradient, xlabel = "x [px]",
-#                          ylabel = "y [px]",
-#                          clims=(-400, 400),
-#                          size=(580,480)
-#         )
+gradient = ColorGradient([:blue, :white, :red])
+heatmap( conv_map, c=gradient, xlabel = "x [px]",
+                         ylabel = "y [px]",
+                         clims=(-400, 400),
+                         size=(580,480)
+        )

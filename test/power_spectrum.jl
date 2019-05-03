@@ -22,5 +22,5 @@ delta_ell = 30.0
 Map_win = strip2.windowing!(NN, conv_map)
 ell2, DlTT2 = strip2.get_power_spectrum(Map_win, Map_win, ell_max, delta_ell,
                                         pix_size, NN)
-plot(ell, DlTT, yaxis = :log)
-plot!(ell2, DlTT2, yaxis = :log)
+plot(ell, DlTT, yaxis = :log, xlims = (0 ,1000), ylims = (100, 10000))
+plot!(ell2, DlTT2, yaxis = :log, xlims = (0 ,1000), ylims = (100, 10000))
