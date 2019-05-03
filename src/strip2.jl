@@ -1,7 +1,6 @@
 module strip2
 
 using Random
-using Healpix
 using FFTW
 
 # gensky methods
