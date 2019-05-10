@@ -2,6 +2,7 @@ module strip2
 
 using Random
 using FFTW
+using ConjGrad
 
 # gensky methods
 export make_CMB_T_map

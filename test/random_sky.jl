@@ -1,11 +1,11 @@
-#include("../src/strip2.jl")
-using strip2
+include("../src/strip2.jl")
+#using strip2
 using DelimitedFiles
-using Plots
-gr()
+#using Plots
+#gr()
 # Strip2: 54deg x 54deg
 # General constants
-NN = 3024
+NN = 1024
 pix_size = 0.5
 beam_waist = 9.0
 
