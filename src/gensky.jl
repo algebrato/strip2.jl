@@ -1,11 +1,25 @@
 """
+    function make_CMB_T_map(N::Int, pix_size::Float64,
+                    ell::AbstractArray{<:Number},
+                    DlTT::AbstractArray{<:Number})
+
+# Brief description
+Given a CAMB power spectrum return a random CMB
+only-temperature map in the`Array{Float64, 2}` format.
+
+# Development
+This functions has not presented weird behaviours.
+The function return a random CMB temperature anisotropies
+maps, that you can draw using the `heatmap` method in
+Plots julia's package.
+
+# Args description
 N           # pixel number in linear dimension
 pix_size    # size of a pixel in arcminutes
-X_width     # horizontal map width in degrees
-Y_width     # vertical map width in degrees
+ell         # Multipole value - angular scale
+DlTT        # Power spectrum value Dₗ = Cₗ⋅(l⋅(l+1)) (μk)²
+              Temperature  Temperature
 """
-
-
 function make_CMB_T_map(N::Int, pix_size::Float64,
                         ell::AbstractArray{<:Number},
                         DlTT::AbstractArray{<:Number})
@@ -41,6 +55,43 @@ function make_CMB_T_map(N::Int, pix_size::Float64,
 end
 
 
+"""
+function make_CMB_pol_maps(N::Int, pix_size::Float64,
+                           ell::AbstractArray{<:Number},
+                           DlTT::AbstractArray{<:Number},
+                           DlEE::AbstractArray{<:Number},
+                           DlTE::AbstractArray{<:Number},
+                           DlBB::AbstractArray{<:Number})
+
+# Brief description
+Given a CAMB power spectrum, in function of the angular scale
+(`ell` scale), return a complete set of maps of a hypothetical
+random sky. The maps has return concern: Temperature (T_Map),
+Q_Stokes_parameter (Q_Map) and U_Stokes_parametes (U_Map).
+
+Whithin the function, the Q and U maps are turn into E and B maps.
+On this last two maps you can use the power spectra analysis tools
+to extract the BB and EE power_spectrum after the introduction
+of the tlescope systematics errors.
+
+# Development
+Actually, the function do not work. I have decided to add it
+beacouse I think that the issue that I have noticed on this
+function has due to CAMB power spectrum format. More test are needed
+in particular testing this function with different power-spectrum set.
+
+
+# Args description
+N           # pixel number in linear dimension
+pix_size    # size of a pixel in arcminutes
+ell         # Multipole value - angular scale
+DlTT        # Power spectrum value Dₗ = Cₗ⋅(l⋅(l+1)) (μk)²
+              Temperature  Temperature (μk)²
+DlEE        # E-modes auto-power_spectrum  polarization  (μk)²
+DlTE        # Cross-power_spectrum between Temperature and E modes (μk)²
+DlBB        # B-modes auto-power_spectrum (μk)²
+
+"""
 function make_CMB_pol_maps(N::Int, pix_size::Float64,
                            ell::AbstractArray{<:Number},
                            DlTT::AbstractArray{<:Number},
@@ -129,11 +180,32 @@ function make_CMB_pol_maps(N::Int, pix_size::Float64,
 end
 
 
+"""
+    function SZ_source(N::Int, pix_size::Float64, Number_of_SZ_Clusters::Int,
+                       Mean_Amplitude_of_SZ_Clusters::Float64,
+                       SZ_beta::Float64, SZ_Theta_core::Float64)
+
+# Brief description
+SZ_source return a sky map Array{Float64, 2} formatted, of the only
+SZ sources. The sources are placed random on the map. The pattern is
+the well-know SZ-profile given by the `beta_function`. The insensity
+and dimensione are normally distribuited around a given mean-amplitude.
+
+# Development
+The function has not presented weird behaviours.
+
+# Args description
+N                      # pixel number in linear dimension
+pix_size               # size of a pixel in arcminutes
+Number_of_SZ_Clusters  # Number of SZ sources on the map
+Mean_Amplitude         # Mean intensity of those sources
+SZ_beta, SZ_Theta_core # Sz spectral indexes
+
+"""
 function SZ_source(N::Int, pix_size::Float64, Number_of_SZ_Clusters::Int,
                    Mean_Amplitude_of_SZ_Clusters::Float64,
                    SZ_beta::Float64, SZ_Theta_core::Float64)
 
-    # Make a realization of a naive SZ_map
     rng = MersenneTwister()
     SZMap = zeros(N, N)
     SZCat = zeros(3, Number_of_SZ_Clusters)
@@ -174,6 +246,17 @@ function beta_function(N::Int, pix_size::Float64, SZ_beta::Float64,
 end
 
 
+"""
+    function PS_poisson(N::Int, pix_size::Float64, N_Sources::Int,
+                        A_Sources::Float64)
+# Brief description
+Return a sky-map Array{Float64, 2} formatted of the point sources
+distribution on the observe sky. You can chose the number of sources
+that are places randomly on the map.
+
+This specific function return N_Sources, with amplitude A_Sources.
+The amplitude is assigned using a Poisson extraction.
+"""
 function PS_poisson(N::Int, pix_size::Float64, N_Sources::Int,
                     A_Sources::Float64)
     PS_Pois = zeros(N, N)
@@ -189,6 +272,17 @@ function PS_poisson(N::Int, pix_size::Float64, N_Sources::Int,
 end
 
 
+"""
+    function PS_exp(N::Int, pix_size::Float64, N_Sources::Int,
+                    A_Sources::Float64)
+# Brief description
+Return a sky-map Array{Float64, 2} formatted of the point sources
+distribution on the observe sky. You can chose the number of sources
+that are places randomly on the map.
+
+This specific function return N_Sources, with amplitude A_Sources.
+The amplitude is assigned using a exponential extraction.
+"""
 function PS_exp(N::Int, pix_size::Float64, N_Sources::Int,
                     A_Sources::Float64)
     PS_expo = zeros(N, N)
