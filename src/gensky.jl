@@ -296,3 +296,31 @@ function PS_exp(N::Int, pix_size::Float64, N_Sources::Int,
     return PS_expo
 
 end
+
+
+"""
+    function Plot_Sky(N::Int, pix_size::Float64, sky::Array{Float64, 2})
+
+# Brief description
+This function plot the CMB heatmap, using the correct axis (in degree)
+
+# Args description
+N         Number of pixel (linear dimension)
+pix_size  Pixel angular resulotion in arcminute
+sky       the sky map in Array{Float64, 2} format
+"""
+function Plot_Sky(N::Int, pix_size::Float64, sky::Array{Float64, 2};
+                  cmin=-400, cmax=400)
+    gradient = ColorGradient([:blue, :white, :red])
+    map_plot = heatmap( sky, c=gradient, xlabel = "x [deg.]",
+                    ylabel = "y [deg.]",
+                    clims=(cmin, cmax),
+                    size=(590,480),
+                    xticks = (round.(range(0, N, length=10)),
+                              round.(range(0, N*pix_size, length=10) ./ 60.0 )),
+                    yticks = (round.(range(0, N, length=10)),
+                              round.(range(0, N*pix_size, length=10) ./ 60.0 ))
+                  )
+    return map_plot
+
+end
