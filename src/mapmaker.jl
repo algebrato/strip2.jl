@@ -1,3 +1,58 @@
+
+"""
+    function destriper(N::Int, dataset_baselines; n_iter=10)
+# Brief description
+You have to use this function to clean a noisy-TOD (comphrensive
+of white and one-over-f nosie).
+
+Suggestion for raster scan:
+In order to suppress the atmospheric noise you should use many
+baselines, better if you have observed those maps with different
+scanning strategies. Now you can use only Left-Right and Up-Down
+scanning.
+
+The descriper solve the noisy-tod linear system:
+[Pᵀ N⁻² P] m = [Pᵀ N⁻²] d
+
+We can reduce it at the tipical solution of
+A x = b where:
+
+A = [Pᵀ N⁻² P]
+b = [Pᵀ N⁻²] d
+
+These matris are too big, so we can you the conjugate gradient method
+in order to solve the system.
+"""
+function destriper(N::Int, dataset_baselines; n_iter=10)
+    b = zeros(N*N)
+    for i in dataset_baselines
+            tod = denoise(i.time_order_data, i.noise)
+            a, h = binned_map(N, tod, i.pointing)
+            b .+= reshape(a, N*N, 1)[:, 1]
+    end
+
+    function A(x)
+        res = zeros(N, N)
+        for i in dataset_baselines
+            tod = get_tod(reshape(x, N, N), i.pointing)
+            tod = denoise(tod, i.noise)
+            mat, hmat = binned_map(N, tod, i.pointing)
+            res .+= mat
+        end
+        return reshape(res, N*N, 1)[:, 1]
+    end
+
+    return conjgrad(A, b; maxiter=n_iter)
+
+end
+
+"""
+    function denoise(tod::Array{Float64, 1}, noise_s::Array{Float64, 1})
+
+# Brief Description
+This function apply the N⁻² variance matrix to the TOD working in the
+fourier space.
+"""
 function denoise(tod::Array{Float64, 1}, noise_s::Array{Float64, 1})
         ftod = fft(tod)
         ftod ./= noise_s
@@ -5,7 +60,10 @@ function denoise(tod::Array{Float64, 1}, noise_s::Array{Float64, 1})
         return tod
 end
 
-
+"""
+    function conjgrad(A, b; x0=0, maxiter=10)
+# Brief description
+"""
 function conjgrad(A, b; x0=0, maxiter=10)
     if x0 == 0
         x = b .* 0
@@ -33,32 +91,9 @@ function conjgrad(A, b; x0=0, maxiter=10)
         beta = next_rz/rz
         rz = next_rz
         p = z + beta*p
+        println("Err: ", err)
     end
 
     return x
-
-end
-
-
-function destriper(N::Int, dataset_baselines)
-    b = zeros(N*N)
-    for i in dataset_baselines
-            tod = strip2.denoise(i.time_order_data, i.noise)
-            a, h = strip2.binned_map(N, tod, i.pointing)
-            b .+= reshape(a, N*N, 1)[:, 1]
-    end
-
-    function A(x)
-        res = zeros(N, N)
-        for i in dataset_baselines
-            tod = strip2.get_tod(reshape(x, N, N), i.pointing)
-            tod = strip2.denoise(tod, i.noise)
-            mat, hmat = strip2.binned_map(N, tod, i.pointing)
-            res .+= mat
-        end
-        return reshape(res, N*N, 1)[:, 1]
-    end
-
-    return strip2.conjgrad(A, b; maxiter=10)
 
 end
