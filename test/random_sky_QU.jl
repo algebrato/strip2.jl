@@ -1,4 +1,6 @@
-using strip2
+include("../src/strip2.jl")
+
+#using strip2
 using DelimitedFiles
 using Plots
 gr()
@@ -23,7 +25,7 @@ N_Sources_EXP = 50
 A_Sources_EXP = 1000.0
 
 # Read the CAMB cmb power spectrum.
-m = readdlm("power_spectrum/CAMB_fiducial_cosmo_scalCls.dat")
+m = readdlm("power_spectrum/CAMB_totalCls.dat")
 
 ell  = m[:, 1]
 DlTT = m[:, 2]
@@ -35,7 +37,31 @@ Map_T, Map_Q, Map_U, Map_E, Map_B = strip2.make_CMB_pol_maps(NN, pix_size, ell,
                                                              DlTT, DlEE, DlTE, DlBB)
 
 gradient = ColorGradient([:blue, :white, :red])
-heatmap( Map_Q, c=gradient, xlabel = "x [px]",
+heatmap( Map_T, c=gradient, xlabel = "x [px]",
                    ylabel = "y [px]",
                    #clims=(-40, 4),
                    size=(580,480))
+
+p1 = strip2.Plot_Sky(NN, pix_size, Map_Q, cmin = -20, cmax = 20)
+p2 = strip2.Plot_Sky(NN, pix_size, Map_U, cmin = -20, cmax = 20)
+p3 = strip2.Plot_Sky(NN, pix_size, Map_E, cmin = -20, cmax = 20)
+p4 = strip2.Plot_Sky(NN, pix_size, Map_B, cmin = -2, cmax = 2)
+
+plot(p1, p2, p3, p4, layout = grid(2, 2), size = (1050, 850))
+
+Map_B_convolved = strip2.convolve_beam(NN, pix_size, beam_waist, Map_B)
+
+strip2.Plot_Sky(NN, pix_size, Map_B_convolved, cmin=-2, cmax=2)
+
+ell_max = 5000.0
+delta_ell = 30.0
+
+win_b = strip2.windowing!(NN, Map_B)
+win_b_con = strip2.windowing!(NN, Map_B_convolved)
+
+
+ell_b, DlBB_obs = strip2.get_power_spectrum(win_b, win_b,
+                                            ell_max, delta_ell, pix_size, NN)
+
+ell_conv, DlBB_conv = strip2.get_power_spectrum(win_b_con, win_b_con,
+          ell_max, delta_ell, pix_size, NN)

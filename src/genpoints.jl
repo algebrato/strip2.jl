@@ -10,7 +10,7 @@ Now return the pointing directions as pixels. You can choose between two
 different scanning strategy mode: if `direction = true` the function return a
 left-right scanning. If `direction = false` the return is a up-down scanning.
 
-Future improvements: I ought code a new`get_points` function in order to
+Future improvements: I ought code a new `get_points` function in order to
 get true sky-direction in Right-ascension and Declination coordinates
 
 # Development

@@ -64,33 +64,44 @@ end
     function conjgrad(A, b; x0=0, maxiter=10)
 # Brief description
 """
-function conjgrad(A, b; x0=0, maxiter=10)
-    if x0 == 0
-        x = b .* 0
-        r = b
-    else
-        x = copy(x0)
-        r = b-A(x)
-    end
+genblas_dot(x, y) = dot(x,y)
+genblas_scal!(a, x) = x .*= a
+genblas_axpy!(a, x, y) = y .+= a.*x
+genblas_nrm2(x) = norm(x)
+function conjgrad(A, b; maxiter=10)
+
+    x = b .* 0
+    r = b
+
     n = length(b)
     z = copy(r)
-    rz = dot(r,z)
-    rz0 = rz
+
     p = z
     err = Inf
-    d = 4
     i = 0
+
+    residual_0 = genblas_nrm2(r)
+
     for i = 1:maxiter
         Ap = A(p)
-        alpha = rz / dot(p, Ap)
-        x += alpha*p #no scalare
-        r -= alpha*Ap #no scalare
+        gamma = genblas_dot(r,z)
+        alpha = gamma / genblas_dot(p, Ap)
+
+        if alpha == Inf || alpha < 0
+            return -13, iter
+        end
+
+        genblas_axpy!(alpha, p, x)
+        genblas_axpy!(-alpha, Ap, r)
+
+        residual = genblas_nrm2(r) / residual_0
+
         z = copy(r)
-        next_rz = dot(r, z)
-        err = rz/rz0
-        beta = next_rz/rz
-        rz = next_rz
-        p = z + beta*p
+
+        beta = genblas_dot(z, r) / gamma
+        genblas_scal!(beta, p)
+        genblas_axpy!(1.0, z, p)
+
         println("Err: ", err)
     end
 
