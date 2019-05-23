@@ -20,6 +20,7 @@ A x = b where:
 A = [Pᵀ N⁻² P]
 b = [Pᵀ N⁻²] d
 
+m = [Pᵀ N⁻² P]⁻¹ [Pᵀ N⁻²] d
 These matris are too big, so we can you the conjugate gradient method
 in order to solve the system.
 """
@@ -102,7 +103,7 @@ function conjgrad(A, b; maxiter=10)
         genblas_scal!(beta, p)
         genblas_axpy!(1.0, z, p)
 
-        println("Err: ", err)
+        #println("Err: ", err)
     end
 
     return x

@@ -11,6 +11,19 @@ function windowing!(N::Int, Map::Array{Float64, 2}; type="default")
 end
 
 
+function windowing_k!(N::Int, Map::Array{Float64, 2}; type="default")
+
+    inds = (((0:(N-1)) .+ 0.5 .- (N/2)) ./ N ) .* π
+    X = reshape(repeat(inds, N), N ,N)
+    Y = X'
+
+    window = (α^2) * sqrt(1-( 2*X / (N-1) - 1) .^2) * sqrt(1-( 2*Y / (N-1) - 1) .^2)
+
+    window .* Map
+
+end
+
+
 function get_power_spectrum(Map1::Array{Float64, 2}, Map2::Array{Float64, 2},
                             max_ell::Float64, delta_ell::Float64,
                             pix_size::Float64, N::Int)

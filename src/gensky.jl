@@ -25,9 +25,8 @@ function make_CMB_T_map(N::Int, pix_size::Float64,
                         DlTT::AbstractArray{<:Number})
 
     ClTT = DlTT .* 2 .* π ./ (ell .* (ell .+ 1.) )
-    ClTT[1] = 0
-
-    inds = ((0:(N-1)) .+ .5 .- ((N-1) / 2.0)) ./ (N-2.0)
+    ClTT[1] = 0.0
+    ClTT[2] = 0.0
 
     X  = reshape(repeat(range(-0.5, 0.5, length=N), N), N, N)
     Y = X'
@@ -310,8 +309,8 @@ pix_size  Pixel angular resulotion in arcminute
 sky       the sky map in Array{Float64, 2} format
 """
 function Plot_Sky(N::Int, pix_size::Float64, sky::Array{Float64, 2};
-                  cmin=-400, cmax=400)
-    gradient = ColorGradient([:blue, :white, :red])
+                  cmin=-400, cmax=400, lab_title="",
+                  gradient=ColorGradient([:blue, :white, :red]))
     map_plot = heatmap( sky, c=gradient, xlabel = "x [deg.]",
                     ylabel = "y [deg.]",
                     clims=(cmin, cmax),
@@ -319,7 +318,8 @@ function Plot_Sky(N::Int, pix_size::Float64, sky::Array{Float64, 2};
                     xticks = (round.(range(0, N, length=10)),
                               round.(range(0, N*pix_size, length=10) ./ 60.0 )),
                     yticks = (round.(range(0, N, length=10)),
-                              round.(range(0, N*pix_size, length=10) ./ 60.0 ))
+                              round.(range(0, N*pix_size, length=10) ./ 60.0 )),
+                    title = lab_title
                   )
     return map_plot
 

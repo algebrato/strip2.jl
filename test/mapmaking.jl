@@ -3,7 +3,7 @@ using BenchmarkTools
 
 include("random_sky.jl")
 
-dir=true
+dir=false
 
 mappa = zeros(NN, NN)
 hit   = zeros(NN, NN)
@@ -21,18 +21,18 @@ for i = 1:N_baselines
     global dir =  true ⊻ dir
 end
 
-obs_map  = strip2.Plot_Sky(NN, pix_size, mappa ./ hit)
+obs_map  = strip2.Plot_Sky(NN, pix_size, mappa ./ hit, cmin=-1500, cmax=1500)
 true_map = strip2.Plot_Sky(NN, pix_size, conv_map)
 
 plot(obs_map, true_map, layout = grid(2,1),size=(590,940))
 
-@benchmark map_des = strip2.destriper(NN, dataset_baselines; n_iter=5)
+map_des = strip2.destriper(NN, dataset_baselines; n_iter=10)
 map_d = reshape(map_des, NN, NN)
 p2 = strip2.Plot_Sky(NN, pix_size, conv_map, cmin = -400, cmax = 400)
-p1 = strip2.Plot_Sky(NN, pix_size, (map_d .- (sum(map_d)/NN*NN)), cmin = -400, cmax = 400)
+p1 = strip2.Plot_Sky(NN, pix_size, (map_d .- (sum(map_d)/NN*NN)) .- conv_map, cmin = -100, cmax = 100)
 
 plot(p1, p2, layout = grid(2,1), size=(590,940))
 
 strip2.Plot_Sky(NN, pix_size, map_d, cmin = -400, cmax = 400)
 
-println("RMS: ",sqrt(sum((map_d .- conv_map) .^2)) / (NN*NN))
+println("RMS: ",sqrt(sum((map_d .- conv_map) .^2) / (NN*NN)))
