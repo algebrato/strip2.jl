@@ -17,21 +17,21 @@ using ProgressMeter
 # The specs of every maps are in the random_sky.jl and gen_noise_map.jl
 
 ell_max = 5000.0
-delta_ell = 30.0
+delta_ell = 20.0
 
 DlTT2 = Array{Float64, 1}(undef, Int(round(ell_max/delta_ell)))
 
+avg_mappa = sum(mappa ./ hit) / (NN*NN)
+avg_conv  = sum(conv_map) / (NN*NN)
+avg_dest  = sum(map_d) / (NN*NN)
 
-e_true, d_true = strip2.get_power_spectrum(cmb_T_map, cmb_T_map, ell_max, delta_ell,
+win_map_raw = strip2.windowing!(NN, ((mappa ./ hit) .- avg_mappa) .- (conv_map .- avg_conv) )
+win_map_dest = strip2.windowing!(NN, (map_d .- avg_dest) .- (conv_map .- avg_conv))
+
+e_raw, d_raw = strip2.get_power_spectrum(win_map_raw, win_map_raw, ell_max, delta_ell,
+                                        pix_size, NN)
+e_des, d_des = strip2.get_power_spectrum(win_map_dest, win_map_dest, ell_max, delta_ell,
                                         pix_size, NN)
 
-e_des, d_des = strip2.get_power_spectrum(map_d, map_d, ell_max, delta_ell,
-                                        pix_size, NN)
-
-a=maximum(DlTT)
-b=maximum(d[3:length(d)])
-ratio = a/b
-
-plot(ell, DlTT, yaxis = :log, xlims = (0, 1000), ylims=(10, 10000))
-plot!(e_true, d_true .* ratio, yaxis = :log, xlims = (0, 1000), ylims=(10,10000))
-plot!(e_des, d_des .* ratio, yaxis = :log, xlims = (0, 1000), ylims=(10,10000))
+plot(e_raw, d_raw .* ratio2, yaxis = :log)
+plot!(e_des, d_des .* ratio2, yaxis = :log)
