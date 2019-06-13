@@ -24,7 +24,7 @@ m = [Pᵀ N⁻² P]⁻¹ [Pᵀ N⁻²] d
 These matris are too big, so we can you the conjugate gradient method
 in order to solve the system.
 """
-function destriper(N::Int, dataset_baselines; n_iter=10)
+function destriper(N::Int, dataset_baselines; n_iter=100)
     b = zeros(N*N)
     for i in dataset_baselines
             tod = denoise(i.time_order_data, i.noise)
@@ -62,14 +62,14 @@ function denoise(tod::Array{Float64, 1}, noise_s::Array{Float64, 1})
 end
 
 """
-    function conjgrad(A, b; x0=0, maxiter=10)
+    function conjgrad(A, b; x0=0, tol=1e-6, maxiter=100)
 # Brief description
 """
 genblas_dot(x, y) = dot(x,y)
 genblas_scal!(a, x) = x .*= a
 genblas_axpy!(a, x, y) = y .+= a.*x
 genblas_nrm2(x) = norm(x)
-function conjgrad(A, b; maxiter=10)
+function conjgrad(A, b; tol=1e-6, maxiter=100)
 
     x = b .* 0
     r = b
@@ -97,13 +97,19 @@ function conjgrad(A, b; maxiter=10)
 
         residual = genblas_nrm2(r) / residual_0
 
+        if residual <= tol
+            println("Resi: ",residual)
+            println("Iter: ",i)
+            return x
+        end
+
         z = copy(r)
 
         beta = genblas_dot(z, r) / gamma
         genblas_scal!(beta, p)
         genblas_axpy!(1.0, z, p)
 
-        #println("Err: ", err)
+        println("Err: ", i, " ", residual)
     end
 
     return x

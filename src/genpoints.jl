@@ -120,7 +120,7 @@ function observe_sky(N_pix::Int, sky::Array{Float64, 2};
 
     rng  = MersenneTwister()
     Frand = fft(randn(rng, length(tod)))
-    noise_spec = tod_noise(length(tod), 0.0083, 0.1, 3.0, 44.196)
+    noise_spec = tod_noise(length(tod), 0.0083, 0.1, 3.0, 20.8)
     fnoise = Frand .* (noise_spec .^0.5)
 
     tod += real.(ifft(fnoise))

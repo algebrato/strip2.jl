@@ -18,7 +18,7 @@ function atmospheric_noise(N::Int, pix_size::Float64, anl::Float64)
     Y = X'
     R = ((X .^2 .+ Y .^2).^0.5) .* (pix_size / 60.0)
 
-    mag_k = ((2.0 * π) ./ (R .+ 0.01)).^(5.0 / 3.0)
+    mag_k = ((2.0 * π) ./ (R .+ 0.01 )).^(5.0 / 3.0)
     atm_rand = fft(random_realization)
     atm_map = ifft(atm_rand .* fftshift(mag_k))
     atm_map_norm = atm_map .* (anl / pix_size)

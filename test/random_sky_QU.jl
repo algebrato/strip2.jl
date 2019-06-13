@@ -42,8 +42,8 @@ heatmap( Map_T, c=gradient, xlabel = "x [px]",
                    #clims=(-40, 4),
                    size=(580,480))
 
-p1 = strip2.Plot_Sky(NN, pix_size, Map_Q, cmin = -20, cmax = 20)
-p2 = strip2.Plot_Sky(NN, pix_size, Map_U, cmin = -20, cmax = 20)
+p1 = strip2.Plot_Sky(NN, pix_size, strip2.convolve_beam(NN,pix_size, beam_waist, Map_Q), cmin = -20, cmax = 20, lab_title="Q Map")
+p2 = strip2.Plot_Sky(NN, pix_size, strip2.convolve_beam(NN,pix_size, beam_waist, Map_U), cmin = -20, cmax = 20, lab_title="U Map")
 p3 = strip2.Plot_Sky(NN, pix_size, Map_E, cmin = -20, cmax = 20)
 p4 = strip2.Plot_Sky(NN, pix_size, Map_B, cmin = -2, cmax = 2)
 
@@ -65,3 +65,12 @@ ell_b, DlBB_obs = strip2.get_power_spectrum(win_b, win_b,
 
 ell_conv, DlBB_conv = strip2.get_power_spectrum(win_b_con, win_b_con,
           ell_max, delta_ell, pix_size, NN)
+
+
+
+
+a=plot(ell, DlTT, yaxis=:log, xaxis=:log, label="TT", ylabel="Cl(l(l+1))[muK ^2]", xlabel="l")
+b=plot!(ell, DlEE, yaxis=:log, xaxis=:log, label="EE")
+c=plot!(ell, DlBB, yaxis=:log, xaxis=:log, label="BB", xlims=(1,2500))
+
+png(c,"ciao")

@@ -25,11 +25,19 @@ strip2.Plot_Sky(NN, pix_size, one_ove_f, cmin=-40, cmax=40)
 
 # atmospheric noise
 grad = ColorGradient([:blue, :white])
-strip2.Plot_Sky(NN, pix_size, atmos_map, cmin=-100, cmax=100, gradient=grad,
+strip2.Plot_Sky(NN, pix_size, strip2.convolve_beam(NN, pix_size, beam_waist, atmos_map), cmin=-100, cmax=100, gradient=grad,
                 lab_title="Atmospheric Correlation Map")
 
 # Raw map
-strip2.Plot_Sky(NN, pix_size, sky, cmin=-500, cmax=500)
+strip2.Plot_Sky(NN, pix_size, conv_map .+ atmos_map, cmin=-500, cmax=500)
 
 # Filtered Map
 strip2.Plot_Sky(NN, pix_size, filtered_map .-conv_map, cmin=-400, cmax=400)
+
+# @gif for iter in 1:10
+#   atmos_map = strip2.atmospheric_noise(NN, pix_size, anl, iter)
+#   grad = ColorGradient([:blue, :white])
+#   strip2.Plot_Sky(NN, pix_size, atmos_map, cmin=-100, cmax=100, gradient=grad,
+#                   lab_title="Atmospheric Correlation Map")
+# end every 1
+#
