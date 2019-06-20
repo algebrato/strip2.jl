@@ -154,7 +154,7 @@ function make_CMB_pol_maps(N::Int, pix_size::Float64,
 
     FT_sky = (CLTT2d .^0.5) .* fft_T_rand
     FE_sky = (real.((ClEE_uncor2d .+ 0im) .^0.5)) .* fft_E_rand .+ # Error!
-             (real.((ClEE_uncor2d .+ 0im) .^0.5)) .* fft_T_rand    # Error!
+             (real.((ClEE_cor2d .+ 0im) .^0.5)) .* fft_T_rand    # Error!
     FB_sky = (real.((CLBB2d .+ 0im) .^0.5)) .* fft_B_rand          # Error!
 
     # Conver the E and B maps into Q and U maps
