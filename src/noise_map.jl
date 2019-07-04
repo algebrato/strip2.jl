@@ -43,3 +43,19 @@ function one_over_f(N::Int, pix_size::Float64, oofnl::Float64)
     return real.(oofn_map_norm)
 
 end
+
+function one_over_f2(N::Int, pix_size::Float64, oofnl::Float64)
+
+    rng = MersenneTwister()
+    random_realization = randn(rng, N, N)
+
+    inds = ((0:(N-1)) .+ 0.5 .- (N/2))
+    X = reshape(repeat(inds, N), N ,N)' .* (pix_size / 60.0)
+    kx = ((2.0 * π) ./ (X .+ 0.01)).^(3)
+    rand_ft = fft(random_realization)
+    oofn_map = ifft(rand_ft .* fftshift(kx))
+    oofn_map_norm = oofn_map .* (oofnl / pix_size)
+
+    return real.(oofn_map_norm)
+
+end

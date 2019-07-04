@@ -22,6 +22,7 @@ export convolve_beam
 export white_noise
 export atmospheric_noise
 export one_over_f
+export one_over_f2
 export filter_noise
 export observe_sky
 export get_tod

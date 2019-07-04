@@ -1,12 +1,14 @@
 # Noise Map
 using Plots
-wnl = 10.0
+wnl = 12.0
 anl = 0.15
 oofnl = 0.2
+oofnl2 = 0.0001
 
 white_map = strip2.white_noise(NN, pix_size, wnl)
 atmos_map = strip2.atmospheric_noise(NN, pix_size, anl)
 one_ove_f = strip2.one_over_f(NN, pix_size, oofnl)
+one_ove_f2 = strip2.one_over_f2(NN, pix_size, oofnl2)
 
 noise_map = white_map .+ atmos_map .+ one_ove_f
 

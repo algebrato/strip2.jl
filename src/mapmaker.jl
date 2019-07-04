@@ -24,7 +24,7 @@ m = [Pᵀ N⁻² P]⁻¹ [Pᵀ N⁻²] d
 These matris are too big, so we can you the conjugate gradient method
 in order to solve the system.
 """
-function destriper(N::Int, dataset_baselines; n_iter=100)
+function destriper(N::Int, dataset_baselines; tolerance=1e-6, n_iter=100)
     b = zeros(N*N)
     for i in dataset_baselines
             tod = denoise(i.time_order_data, i.noise)
@@ -43,7 +43,8 @@ function destriper(N::Int, dataset_baselines; n_iter=100)
         return reshape(res, N*N, 1)[:, 1]
     end
 
-    return conjgrad(A, b; maxiter=n_iter)
+    return ConjGrad.cg(A, b, tol=1e-10, maxIter=100)
+    #return conjgrad(A, b, tol=1e-10, maxiter=100)
 
 end
 
@@ -109,9 +110,34 @@ function conjgrad(A, b; tol=1e-6, maxiter=100)
         genblas_scal!(beta, p)
         genblas_axpy!(1.0, z, p)
 
-        println("Err: ", i, " ", residual)
+        #println("Err: ", i, " ", residual)
     end
 
     return x
+
+end
+
+
+function make_dataset(tod::Array{Float64, 1}, pix_idx::Array{Int64, 1},
+                      Num_bas::Int64
+                      )
+    len_tod = length(tod)
+    len2    = Int(round(len_tod / Num_bas))
+
+    mat_tod = reshape(tod, (len2, Num_bas))
+    mat_point = reshape(pix_idx, (len2, Num_bas))
+
+    dataset_baselines = Array{Tpn, 1}(undef, Num_bas)
+
+    noise_spec = tod_noise(len2,  0.0083, 0.1, 3.0, 20.76)
+    # Ora e` tutto uguale per ogni baselines, l'ideale sarebbe
+    # inserire un fit, con il modello scelto, per ogni baselines
+
+    for i in 1:Num_bas
+        dat = Tpn(mat_tod[:, i], mat_point[:, i], noise_spec)
+        dataset_baselines[i] = dat
+    end
+
+    return dataset_baselines
 
 end
