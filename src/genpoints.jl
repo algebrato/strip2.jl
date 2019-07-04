@@ -21,10 +21,9 @@ N_pix:      Number of pixel, in linear coordinate
 sky  :      The sky that you want observe, in Array{Float64, 2} format
 direction:  If true = Left-Right scanning else Up-Down.
 """
-function get_points(N_pix::Int, sky::Array{Float64, 2}; direction::Bool)
+function get_points(N_pix::Int; direction::Bool)
 
     points = Array{Float64, 1}(undef, 0)
-    pixels = range(1, N_pix*N_pix, length = N_pix*N_pix)
 
     if direction == true
         x_pix = Array{Int64, 1}(undef, 0)
@@ -71,7 +70,6 @@ function get_points(N_pix::Int, sky::Array{Float64, 2}; direction::Bool)
 
 end
 
-
 """
     function get_tod(sky::Array{Float64, 2}, points::Array{Int64, 2})
 
@@ -115,15 +113,17 @@ noise :     Is a useless args ... I ought clean this mess!
 function observe_sky(N_pix::Int, sky::Array{Float64, 2};
                      noise::Bool, direction_l_r::Bool)
 
-    points  = Int.(round.(get_points(N_pix, sky, direction=direction_l_r)))
+    points  = Int.(round.(get_points(N_pix, direction=direction_l_r)))
     tod = get_tod(sky, points)
 
-    rng  = MersenneTwister()
-    Frand = fft(randn(rng, length(tod)))
-    noise_spec = tod_noise(length(tod), 0.0083, 0.1, 3.0, 20.8)
-    fnoise = Frand .* (noise_spec .^0.5)
+    if noise==true
+        rng  = MersenneTwister()
+        Frand = fft(randn(rng, length(tod)))
+        noise_spec = tod_noise(length(tod), 0.0083, 0.1, 3.0, 20.76)
+        fnoise = Frand .* (noise_spec .^0.5)
+        tod += real.(ifft(fnoise))
+    end
 
-    tod += real.(ifft(fnoise))
     dataset = TOD_fake_pointing(tod, points, noise_spec)
 
     return dataset
