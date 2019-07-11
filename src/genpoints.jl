@@ -122,9 +122,11 @@ function observe_sky(N_pix::Int, sky::Array{Float64, 2};
         noise_spec = tod_noise(length(tod), 0.0083, 0.1, 3.0, 20.76)
         fnoise = Frand .* (noise_spec .^0.5)
         tod += real.(ifft(fnoise))
+        dataset = TOD_fake_pointing(tod, points, noise_spec)
+    else
+        noise_spec = tod_noise(length(tod), 0.0083, 0.1, 3.0, 20.76)
+        dataset = TOD_fake_pointing(tod, points, noise_spec)
     end
-
-    dataset = TOD_fake_pointing(tod, points, noise_spec)
 
     return dataset
 
