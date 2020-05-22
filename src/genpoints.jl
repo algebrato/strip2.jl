@@ -119,9 +119,13 @@ function observe_sky(N_pix::Int, sky::Array{Float64, 2};
     if noise==true
         rng  = MersenneTwister()
         Frand = fft(randn(rng, length(tod)))
+        #Frand2 = fft(randn(rng, length(tod)))
         noise_spec = tod_noise(length(tod), 0.0083, 0.1, 3.0, 20.76)
+        #noise_spec2 = tod_noise(length(tod), 0.0083, 1.0, 2.0, 20.76)
         fnoise = Frand .* (noise_spec .^0.5)
+        #fnoise2 = Frand2 .* (noise_spec2 .^0.5)
         tod += real.(ifft(fnoise))
+        #tod += real.(ifft(fnoise2))
         dataset = TOD_fake_pointing(tod, points, noise_spec)
     else
         noise_spec = tod_noise(length(tod), 0.0083, 0.1, 3.0, 20.76)

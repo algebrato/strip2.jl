@@ -24,6 +24,7 @@ m = [Pᵀ N⁻² P]⁻¹ [Pᵀ N⁻²] d
 These matris are too big, so we can you the conjugate gradient method
 in order to solve the system.
 """
+
 function destriper(N::Int, dataset_baselines; tolerance=1e-6, n_iter=100)
     b = zeros(N*N)
     for i in dataset_baselines
@@ -56,6 +57,7 @@ This function apply the N⁻² variance matrix to the TOD working in the
 fourier space.
 """
 function denoise(tod::Array{Float64, 1}, noise_s::Array{Float64, 1})
+        FFTW.set_num_threads(12)
         ftod = fft(tod)
         ftod ./= noise_s
         tod = real.(ifft(ftod))

@@ -1,37 +1,65 @@
 include("random_sky.jl")
 include("gen_noise_map.jl")
 using ProgressMeter
-# Aailable maps:
-# cmb_T_map = CMB temperature map
-# sz_map  = SZ Contribute
-# point_pois, point_expo = exponential sources contribute
-# mapp = cmb_T_map .+ sz_map .+ point_pois .+ point_expo
-# conv_map  = Cosmological signal maps convolved with instrument beam
 
-# All noise sources maps:
-# white_map
-# atmos_map
-# one_ove_f
-# noise_map = sum(white_map, atmos_map, one_ove_f)
+e_des = Array{Float64, 1}(undef,100)
+d_des = Array{Float64, 1}(undef,100)
 
-# The specs of every maps are in the random_sky.jl and gen_noise_map.jl
+for i in 1:10
+    global dir=false
+    mappa = zeros(NN, NN)
+    hit   = zeros(NN, NN)
+    N_baselines = 10
+    dataset_baselines = Array{Main.strip2.TOD_fake_pointing, 1}(undef, N_baselines)
 
-ell_max = 5000.0
-delta_ell = 20.0
+    for i = 1:N_baselines
+        dataset = strip2.observe_sky(NN, conv_map; noise=true, direction_l_r=dir)
+        m, h = strip2.binned_map(NN, dataset.time_order_data, dataset.pointing)
+        mappa .+= m
+        hit   .+= h
+        dataset_baselines[i] = dataset
+        global dir =  true ⊻ dir
+    end
 
-DlTT2 = Array{Float64, 1}(undef, Int(round(ell_max/delta_ell)))
+    map_des = strip2.destriper(NN, dataset_baselines)
+    map_d = reshape(map_des, NN, NN)
 
-avg_mappa = sum(mappa ./ hit) / (NN*NN)
-avg_conv  = sum(conv_map) / (NN*NN)
-avg_dest  = sum(map_d) / (NN*NN)
+    ell_max = 5000.0
+    delta_ell = 50.0
 
-win_map_raw = strip2.windowing!(NN, ((mappa ./ hit) .- avg_mappa) .- (conv_map .- avg_conv) )
-win_map_dest = strip2.windowing!(NN, (map_d .- avg_dest) .- (conv_map .- avg_conv))
+    win_map_dest = strip2.windowing!(NN, (map_d .- avg_dest))
 
-e_raw, d_raw = strip2.get_power_spectrum(win_map_raw, win_map_raw, ell_max, delta_ell,
-                                        pix_size, NN)
-e_des, d_des = strip2.get_power_spectrum(win_map_dest, win_map_dest, ell_max, delta_ell,
-                                        pix_size, NN)
+    a, b = strip2.get_power_spectrum(win_map_dest, win_map_dest,
+                                            ell_max, delta_ell, pix_size, NN)
+    e_des .+= a
+    d_des .+= b
+end
 
-plot(e_raw, d_raw .* ratio2, yaxis = :log)
-plot!(e_des, d_des .* ratio2, yaxis = :log)
+e_des ./= 10.0
+d_des ./= 10.0
+
+Multiply = DlTT[Int.(round.(e_des)) .- 1] ./ d_des
+
+
+R = 0.0001:0.0001:0.1
+
+mag_k = ((2.0 * π) ./ (R .+ 0.01 )).^(5.0 / 3.0)
+pix_to_rad = pix_size / 60. * π  / 180.  # Scale factor between pix to rad
+ell_scale_factor = 2. * π / pix_to_rad
+ell_atm = R .* ell_scale_factor
+
+
+
+(1 .+ ( max.(Freq, Freq[2]) ./ fknee).^(-alpha)) .* (sigma^2)
+
+p(f)=(1 + f/f_knee )^(-α) * σ
+
+
+
+
+
+
+
+pp=plot(ell, DlTT./maximum(DlTT), label="CMB Temp. normalized", yaxis=:log, xlims =(0.00001, 1000), ylims=(0.1,1), xlabel="l", ylabel="Dl/max(Dl)", size=(500,500))
+pp=plot!(ell, DlBB./maximum(DlBB), label="CMB BB normalized", size=(500,500))
+pp=plot!(ell_atm, mag_k ./ maximum(mag_k), label="Atmospheric normalized", size=(500,500))
